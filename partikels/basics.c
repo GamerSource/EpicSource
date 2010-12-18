@@ -9,7 +9,8 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 
-#define PARTICLES 10
+#define DEBUG 1
+#define PARTICLES 5000
 #define FRAME_H 10
 
 typedef struct _pos
@@ -39,17 +40,20 @@ typedef	 struct _Ergb
 typedef struct _prtkl 
 {
 	Epos vel,pos,gravity;
+	Epos rot;
+	float deg;
 	Ergba color;
 	int type;
 	float life,fade;
 } Eparticle;
 // Prototypes
-void esCreateParticle(Eparticle prtcl);
-void esAssociateParticle(Eparticle prtcl,float a);
-void esMvParticle(Eparticle prtcl);
+void esResetParticle(Eparticle *prtcl,int rnd_flag);
+void esDrawParticle(Eparticle prtcl,float a);
+void esMvParticle(Eparticle *prtcl);
 void esDemoBg(float w, float h, double alpha);
 void esDrawCube(Epos3 data, Ergb color[]);
 void esDrawSquare(Epos3 data, Ergb color);
+int esInitGL();
 
 int rot_h = 0;
 
@@ -63,16 +67,15 @@ int main()
 	Uint32 now,nxt_time,frame_avg_helper;
 	SDL_Event event;
 	Ergb cube_colors[6] = {{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f},{1.0f,0.0f,0.0f},{0.0f,1.0f,1.0f},{0.0f,0.0f,1.0f},{1.0f,0.0f,1.0f}};
-	Epos3  cube ={600.0f,495.0f,100.0f, 400.0f,350.0f,300.0f, 1.0f,0.0f,1.0f, 0.0f};
-	Eparticle particle[10];
+	Epos3  cube ={600.0f,495.0f,100.0f, 400.0f,400.0f,400.0f, 1.0f,0.0f,1.0f, 0.0f};
+	Eparticle particle[PARTICLES];
 
 	
-	for(i=0; i < 10; i++)
+	for(i=0; i < PARTICLES; i++)
 	{
-		particle[i].type=-1;
+		esResetParticle(&particle[i],1);
 	}
-	printf("Press Spacebar do Start/Stop roation\nPress Escape to exit\nSizeof: %d\n",sizeof(Epos3));
-	//scanf("%lf",&alpha);
+	printf("Press Spacebar do Start/Stop roation\nPress Escape to exit\n");
 	frame_ms=1000/((frames>5&&frames<1000)?frames:29);
 	atexit(SDL_Quit);
 	if( SDL_SetVideoMode( screen_w, screen_h, 32, SDL_OPENGL | SDL_HWPALETTE | SDL_GL_DOUBLEBUFFER ) == NULL )
@@ -80,24 +83,13 @@ int main()
 		printf("Can't set video mode: %s\n", SDL_GetError());
 		exit(1);
 	}
-	// OpenGl Zeugs
-	glClearColor(0.8, 0.8, 0.8, 0 );
-    glClearDepth( 1.0f );
-    glEnable( GL_DEPTH_TEST );
-    glDepthFunc( GL_LEQUAL );
-    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-    glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
-	glMatrixMode( GL_PROJECTION );
-	glLoadIdentity();
-	glOrtho( 0, screen_w, screen_h, 0, -1000, 500 );
-	glMatrixMode( GL_MODELVIEW );
-	glLoadIdentity();
-	if( glGetError() != GL_NO_ERROR )
+	if(esInitGL(screen_w,screen_h)!=1)
 	{
 		printf("Can't set OpenGL\n");
-		exit(1);    
+		exit(1);
 	}
 	SDL_WM_SetCaption("ES - Particle System Basics","EP!C SOURCE - Partikel System Basics");
+	
 	frame_avg_helper = SDL_GetTicks()+5000;
 	nxt_time = SDL_GetTicks()+frame_ms;
 	while(quit==0)
@@ -125,6 +117,12 @@ int main()
 		glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);		
 		esDemoBg(900,600,alpha);
 		
+		for(i=0; i < PARTICLES; i++)
+		{
+			esDrawParticle(particle[i],4);
+			esMvParticle(&particle[i]);
+		}
+		
 		esDrawCube(cube, cube_colors);
 		
 		cube.deg = (rot_h==1)?cube.deg+0.3f:cube.deg;
@@ -147,10 +145,7 @@ int main()
 }
 
 void esDemoBg(float w, float h, double alpha)
-{
-	//double h;
-	//h = d * sin(alpha);
-	
+{	
 	glLoadIdentity();
 	glTranslatef( 10,900,50);
 	glRotatef(alpha,0.5f, 0.0f, 1.0f);
@@ -168,18 +163,58 @@ void esDemoBg(float w, float h, double alpha)
 	return;
 }
 
-void esCreateParticle(Eparticle prtcl)
+void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
-	
+	prtcl->vel.x = (rnd_flag)?(-40+(rand()%101))/100.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-40+(rand()%101))/100.0f:0.0f;
+	prtcl->vel.z = (rnd_flag)?(-40+(rand()%101))/100.0f:0.0f;
+	prtcl->pos.x = (rnd_flag)?(float)(rand()%1200):0.0f;
+	prtcl->pos.y = (rnd_flag)?(float)(rand()%990):0.0f;
+	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
+	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->gravity.y = (rnd_flag)?(-80+(rand()%61))/100.0f:0.0f;
+	prtcl->gravity.z = 0.0f; //(rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->rot.x = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->rot.y = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->deg = 0;
+	prtcl->type = 1;
+	prtcl->life = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->fade = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	return;
 }
-void esAassociateParticle(float a, int type)
+void esDrawParticle(Eparticle prtcl,float a)
 {
-	
+	switch(prtcl.type)
+	{
+	#ifdef DEBUG
+		case 0:
+		{
+			printf("\nEP!C DEBUG: Virtual Particle won't become real...\n");
+		break;
+		}
+	#endif
+		case 1: // Draw a Square for each Particle
+		{
+			esDrawSquare((Epos3){prtcl.pos.x,prtcl.pos.y,prtcl.pos.z, a,a,a, prtcl.rot.x,prtcl.rot.y,prtcl.rot.z, prtcl.deg,},(Ergb){0.0f,0.0f,1.0f});//28;134;238
+			break;
+		}
+		case 2: // Draw a Cube for each Particle
+		{
+			esDrawCube((Epos3){prtcl.pos.x,prtcl.pos.y,prtcl.pos.z, a,a,a, prtcl.rot.x,prtcl.rot.y,prtcl.rot.z, prtcl.deg,},(Ergb[6]){(Ergb){0.5f,0.5f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.7f,0.7f,0.7f},(Ergb){0.5f,0.5f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.7f,0.7f,0.7f}});
+			break;
+		}
+	}
 	return;
 }
-void esMvParticle(Eparticle prtcl)
+void esMvParticle(Eparticle *prtcl)
 {
+	if(prtcl->pos.x+prtcl->vel.x>1198.0f||prtcl->pos.x+prtcl->vel.x<2.0f) prtcl->vel.x = - prtcl->vel.x;
+	prtcl->pos.x += prtcl->vel.x+prtcl->gravity.x;
+	if(prtcl->pos.y+prtcl->vel.y>1198.0f||prtcl->pos.y+prtcl->vel.y<2.0f) prtcl->vel.y = - prtcl->vel.y;
+	prtcl->pos.y += prtcl->vel.y+prtcl->gravity.y;
+	if(prtcl->pos.z+prtcl->vel.z>999.0f||prtcl->pos.z+prtcl->vel.z<-100.0f) prtcl->vel.z = - prtcl->vel.z;
+	prtcl->pos.z += prtcl->vel.z+prtcl->gravity.z;
 	return;
 }
 void esDrawCube(Epos3 data, Ergb color[])
@@ -230,7 +265,6 @@ void esDrawCube(Epos3 data, Ergb color[])
 		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);  	// F
 		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  		// G
 		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// C
-        //*/
     glEnd();
 	glLoadIdentity();
 	return;
@@ -241,13 +275,32 @@ void esDrawSquare(Epos3 data, Ergb color)
 	glTranslatef(data.pos.x, data.pos.y, data.pos.z);
 	glRotatef(data.deg,data.rot.x,data.rot.y,data.rot.z);
 	glColor3f( color.r, color.g, color.b);
-    glBegin( GL_QUADS );
-		// Top		
-		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);
-		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);
-		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);
-		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);		
+    glBegin( GL_QUADS );		
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, 0.0f);
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, 0.0f);
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, 0.0f);
+		glVertex3f(-data.size.x/2.0f,data.size.y/2.0f, 0.0f);		
     glEnd();
 	glLoadIdentity();
 	return;
+}
+
+int esInitGL(int screen_w,int screen_h)
+{
+	glClearColor(0.8, 0.8, 0.8, 0 );
+    glClearDepth( 1.0f );
+    glEnable( GL_DEPTH_TEST );
+    glDepthFunc( GL_LEQUAL );
+    glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+    glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
+	glMatrixMode( GL_PROJECTION );
+	glLoadIdentity();
+	glOrtho( 0, screen_w, screen_h, 0, -1000, 500 );
+	glMatrixMode( GL_MODELVIEW );
+	glLoadIdentity();
+	if( glGetError() != GL_NO_ERROR )
+	{		
+		return 0;   
+	}
+	return 1;
 }
