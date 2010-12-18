@@ -17,6 +17,15 @@ typedef struct _pos
 	GLfloat x,y,z;
 } Epos;
 
+typedef struct _pos3
+{
+	Epos pos;
+	Epos size;
+	Epos rot;
+	float deg;
+} Epos3;
+
+
 typedef	 struct _Ergba
 {
 	float r,g,b,a;
@@ -29,7 +38,7 @@ typedef	 struct _Ergb
 
 typedef struct _prtkl 
 {
-	Epos vel,pos;
+	Epos vel,pos,gravity;
 	Ergba color;
 	int type;
 	float life,fade;
@@ -39,21 +48,22 @@ void esCreateParticle(Eparticle prtcl);
 void esAssociateParticle(Eparticle prtcl,float a);
 void esMvParticle(Eparticle prtcl);
 void esDemoBg(float w, float h, double alpha);
-void esDrawCube(Epos pos, Epos size, Ergb color[]);
+void esDrawCube(Epos3 data, Ergb color[]);
+void esDrawSquare(Epos3 data, Ergb color);
 
-float angel = 45.0f;
 int rot_h = 0;
 
 int main()
 {
+	srand(time(NULL));
 	int i,j,k;
 	int quit=0,screen_w=1200,screen_h=990,frames=120,frame_ms;
 	unsigned int lifetime = 5000,drawn_frames=0;
 	double alpha=10;	
 	Uint32 now,nxt_time,frame_avg_helper;
 	SDL_Event event;
-	Ergb cube_colors[6] = {{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f},{1.0f,0.0f,0.0f},{0.0f,1.0f,1.0f},{0.0f,0.0f,1.0f},{1.0f,0.0f,1.0f}},cube_cols[6] = {{1.0f,1.0f,0.0f},{1.0f,0.0f,1.0f},{0.8f,0.3f,0.3f},{0.8f,1.0f,0.0f},{0.5f,0.0f,1.0f},{0.8f,1.0f,1.0f}};
-	Epos cube_pos = {200.0f,300.0f,0.0f}, cube_size = {100.0f,100.0f,100.0f},cube_size_2 = {500.0f,250.0f,100.0f};
+	Ergb cube_colors[6] = {{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f},{1.0f,0.0f,0.0f},{0.0f,1.0f,1.0f},{0.0f,0.0f,1.0f},{1.0f,0.0f,1.0f}};
+	Epos3  cube ={600.0f,495.0f,100.0f, 400.0f,350.0f,300.0f, 1.0f,0.0f,1.0f, 0.0f};
 	Eparticle particle[10];
 
 	
@@ -61,7 +71,7 @@ int main()
 	{
 		particle[i].type=-1;
 	}
-	printf("Press Spacebar do Start/Stop roation\nPress Escape to exit\n");
+	printf("Press Spacebar do Start/Stop roation\nPress Escape to exit\nSizeof: %d\n",sizeof(Epos3));
 	//scanf("%lf",&alpha);
 	frame_ms=1000/((frames>5&&frames<1000)?frames:29);
 	atexit(SDL_Quit);
@@ -115,30 +125,9 @@ int main()
 		glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);		
 		esDemoBg(900,600,alpha);
 		
+		esDrawCube(cube, cube_colors);
 		
-		for(i=0;i<14;i++)
-		{
-			esDrawCube((Epos){1.0f+(float)i*(float)cube_size.x+5,275.0f,25.0f}, cube_size, cube_cols);
-		}
-		for(i=0;i<14;i++)
-		{
-			esDrawCube((Epos){1.0f+(float)i*(float)cube_size.x+5,100.0f,25.0f}, cube_size, cube_cols);
-		}
-		for(i=0;i<14;i++)
-		{
-			esDrawCube((Epos){1.0f+(float)i*(float)cube_size.x+5,450.0f,25.0f}, cube_size, cube_cols);
-		}
-		for(i=0;i<14;i++)
-		{
-			esDrawCube((Epos){1.0f+(float)i*(float)cube_size.x+5,625.0f,25.0f}, cube_size, cube_cols);
-		}
-		for(i=0;i<14;i++)
-		{
-			esDrawCube((Epos){1.0f+(float)i*(float)cube_size.x+5,800.0f,25.0f}, cube_size, cube_cols);
-		}
-		esDrawCube((Epos){600.0f,495.0f,0.0f}, cube_size_2, cube_colors);
-		
-		angel = (rot_h==1)?angel+0.3f:angel;
+		cube.deg = (rot_h==1)?cube.deg+0.3f:cube.deg;
 		SDL_GL_SwapBuffers();
 		drawn_frames++;
 		now = SDL_GetTicks();
@@ -193,56 +182,71 @@ void esMvParticle(Eparticle prtcl)
 {
 	return;
 }
-void esDrawCube(Epos pos, Epos size, Ergb color[])
+void esDrawCube(Epos3 data, Ergb color[])
 {
 	int i=0;
 	glLoadIdentity();
-	glTranslatef( pos.x, pos.y, pos.z);	
-	glRotatef(angel,1.0f,0.5f,0.0f);	
-	glColor3f( 0.5f, 0.5f, 1.0f);
-    glBegin( GL_QUADS );
-	    // Top
-	    glColor3f( color[i].r, color[i].g, color[i].b);
-        glVertex3f(-size.x/2.0f, -size.y/2.0f, -size.z/2.0f);	// A done
-		glVertex3f(-size.x/2.0f, -size.y/2.0f, size.z/2.0f); 	// E done
-        glVertex3f(size.x/2.0f, -size.y/2.0f, size.z/2.0f);  	// F done
-        glVertex3f(size.x/2.0f, -size.y/2.0f, -size.z/2.0f);  	// B done
-        i++;
-        // Bottom
-       	glColor3f( color[i].r, color[i].g, color[i].b);
-        glVertex3f(-size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// D done
-        glVertex3f(-size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// H done       
-        glVertex3f(size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// G done
-        glVertex3f(size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// C done
-        i++; 
-        /// Front
-       	glColor3f( color[i].r, color[i].g, color[i].b); 
-        glVertex3f(-size.x/2.0f, -size.y/2.0f, -size.z/2.0f); 	// A
-        glVertex3f(size.x/2.0f, -size.y/2.0f, -size.z/2.0f);  	// B
-        glVertex3f(size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// C
-        glVertex3f(-size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// D
-        i++;
-        // Back
-       	glColor3f( color[i].r, color[i].g, color[i].b);
-        glVertex3f(size.x/2.0f, -size.y/2.0f, size.z/2.0f);  	// F
-        glVertex3f(-size.x/2.0f, -size.y/2.0f, size.z/2.0f); 	// E
-        glVertex3f(-size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// H
-        glVertex3f(size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// G
-        i++;        
-        // Left
-       	glColor3f( color[i].r, color[i].g, color[i].b);
-        glVertex3f(-size.x/2.0f, -size.y/2.0f, size.z/2.0f); 	// E
-        glVertex3f(-size.x/2.0f, -size.y/2.0f, -size.z/2.0f); 	// A
-        glVertex3f(-size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// D
-        glVertex3f(-size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// H 
-        // Right
-        i++;
-       	glColor3f( color[i].r, color[i].g, color[i].b);
-        glVertex3f(size.x/2.0f, -size.y/2.0f, -size.z/2.0f);  	// B
-        glVertex3f(size.x/2.0f, -size.y/2.0f, size.z/2.0f);  	// F
-        glVertex3f(size.x/2.0f, size.y/2.0f, size.z/2.0f);  	// G
-        glVertex3f(size.x/2.0f, size.y/2.0f, -size.z/2.0f);  	// C
+	glTranslatef(data.pos.x, data.pos.y, data.pos.z);	
+	glRotatef(data.deg,data.rot.x,data.rot.y,data.rot.z);
+    glBegin(GL_QUADS);
+		// Top
+		glColor3f( color[i].r, color[i].g, color[i].b);
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);	// A done
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f); 	// E done
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);  	// F done
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);  	// B done
+		i++;
+		// Bottom
+		glColor3f( color[i].r, color[i].g, color[i].b);
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// D done
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  	// H done       
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  		// G done
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// C done
+		i++; 
+		/// Front
+		glColor3f( color[i].r, color[i].g, color[i].b); 
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f); 	// A
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);  	// B
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// C
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// D
+		i++;
+		// Back
+		glColor3f( color[i].r, color[i].g, color[i].b);
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);  	// F
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f); 	// E
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  	// H
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  		// G
+		i++;        
+		// Left
+		glColor3f( color[i].r, color[i].g, color[i].b);
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f); 	// E
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f); 	// A
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// D
+		glVertex3f(-data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  	// H 
+		// Right
+		i++;
+		glColor3f( color[i].r, color[i].g, color[i].b);
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);  	// B
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);  	// F
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, data.size.z/2.0f);  		// G
+		glVertex3f(data.size.x/2.0f, data.size.y/2.0f, -data.size.z/2.0f);  	// C
         //*/
+    glEnd();
+	glLoadIdentity();
+	return;
+}
+void esDrawSquare(Epos3 data, Ergb color)
+{
+	glLoadIdentity();
+	glTranslatef(data.pos.x, data.pos.y, data.pos.z);
+	glRotatef(data.deg,data.rot.x,data.rot.y,data.rot.z);
+	glColor3f( color.r, color.g, color.b);
+    glBegin( GL_QUADS );
+		// Top		
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);
+		glVertex3f(-data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, data.size.z/2.0f);
+		glVertex3f(data.size.x/2.0f, -data.size.y/2.0f, -data.size.z/2.0f);		
     glEnd();
 	glLoadIdentity();
 	return;
