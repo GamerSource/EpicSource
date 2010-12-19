@@ -3,4 +3,6 @@ GamerSource won't take responsibility for any  damage made  by this project.
 
 Use it only if you're sure what you do and you've checked the few poor lines of code...
 
+To build the file(s) link it again GL (-lGL) and SDL:
+
 © 2010 http://gamer-source.org
