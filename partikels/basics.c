@@ -10,7 +10,7 @@
 #include <SDL/SDL_opengl.h>
 
 #define DEBUG 1
-#define PARTICLES 50
+#define PARTICLES 500
 #define FRAME_H 10
 
 typedef struct _pos
@@ -61,7 +61,7 @@ int main()
 {
 	srand(time(NULL));
 	int i,j,k;
-	int quit=0,screen_w=1200,screen_h=990,frames=100,frame_ms;
+	int quit=0,screen_w=1200,screen_h=990,frames=120,frame_ms;
 	unsigned int lifetime = 5000,drawn_frames=0;
 	float rot_per_frame = 0.3f;
 	double alpha=10;	
@@ -76,7 +76,7 @@ int main()
 	{
 		esResetParticle(&particle[i],1);
 	}
-	printf("Press Spacebar do Start/Stop roation\nPress Escape to exit\n");
+	printf("\n>> Press Spacebar do Start/Stop cube roation\n>> Click right mouse button to speed up cube rotation\n>> Press Escape to exit\n>> Press Return (OK) to reset Particles\n\nTrying to get %d fps stable...\n",frames);
 	frame_ms=(int)1000/((frames>5&&frames<1000)?frames:29);
 	atexit(SDL_Quit);
 	if( SDL_SetVideoMode( screen_w, screen_h, 32, SDL_OPENGL | SDL_HWPALETTE | SDL_GL_DOUBLEBUFFER ) == NULL )
@@ -108,6 +108,13 @@ int main()
 					{
 						rot_h = (rot_h==1)?0:1;//printf("SPACE BAR down\n");
 					}
+					if(event.key.keysym.sym==SDLK_RETURN) 
+					{
+							for(i=0; i < PARTICLES; i++)
+							{
+								esResetParticle(&particle[i],1);
+							}
+					}
 				break;
 				case SDL_MOUSEBUTTONDOWN:
 					if( event.button.button == SDL_BUTTON_RIGHT )
@@ -115,7 +122,7 @@ int main()
 				break;        
 			}			
 		}		
-		glClear( GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 		esDemoBg(900,600,alpha);
 		
 		for(i=0; i < PARTICLES; i++)
@@ -124,18 +131,18 @@ int main()
 			esMvParticle(&particle[i]);
 		}
 		
-		esDrawCube(cube, cube_colors);
-		
+		esDrawCube(cube, cube_colors);		
 		cube.deg = (rot_h==1)?cube.deg+rot_per_frame:cube.deg;
+		
 		SDL_GL_SwapBuffers();
-		drawn_frames++;
-		now = SDL_GetTicks();
+		drawn_frames++;		
+		now = SDL_GetTicks();		
 		if(frame_avg_helper<now)
 		{
 			printf("%d Frames after %.3f Seconds => fps: %.3f\n",drawn_frames,(now-frame_avg_helper+5000)/1000.0f,drawn_frames/((now-frame_avg_helper+5000)/1000.0f));
 			frame_avg_helper = now+5000;
 			drawn_frames=0;
-		}	
+		}			
 		now = SDL_GetTicks();
 		SDL_Delay((nxt_time<=now)?0:nxt_time-now);
 		nxt_time += frame_ms;
@@ -153,15 +160,15 @@ void esControlParticle(Eparticle *prtcl)
 // Reset Paricles to zero or a random value
 void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
-	prtcl->vel.x = -0.1f;// (rnd_flag)?(-300+(rand()%601))/1000.0f:0.0f;
-	prtcl->vel.y = (rnd_flag)?(-300+(rand()%601))/1000.0f:0.0f;
-	prtcl->vel.z = (rnd_flag)?(-300+(rand()%601))/1000.0f:0.0f;
+	prtcl->vel.x = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
+	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
 	prtcl->pos.x = 600.0f; // (rnd_flag)?(float)(rand()%1200):0.0f;
 	prtcl->pos.y = 80.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
-	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
-	prtcl->gravity.y = 0.2 ;//(rnd_flag)?(-10+(rand()%61))/100.0f:0.0f;
-	prtcl->gravity.z = 0.0f; //(rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
+	prtcl->gravity.y = 0.0005f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
+	prtcl->gravity.z = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->rot.x = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.y = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
@@ -205,21 +212,23 @@ void esMvParticle(Eparticle *prtcl)
 {
 	if(prtcl->pos.x+prtcl->vel.x<2.0f||prtcl->pos.x+prtcl->vel.x>1198.0f)
 	{
-		prtcl->vel.x = 0.0f;		
+		prtcl->vel.x = -prtcl->vel.x;		
 	}
 	else
 	{
-		prtcl->pos.x += prtcl->vel.x+prtcl->gravity.x;
-		prtcl->vel.x += (prtcl->vel.x<0)?prtcl->gravity.x:-prtcl->gravity.x;
+		prtcl->pos.x += prtcl->vel.x;
+		prtcl->vel.x += prtcl->gravity.x;
 	}
-	if(prtcl->pos.y+prtcl->vel.y<2.0f||prtcl->pos.y+prtcl->vel.y>988.0f)
+	if(prtcl->pos.y+prtcl->vel.y<=2.0f||prtcl->pos.y+prtcl->vel.y>988.0f)
 	{
-		prtcl->vel.y = 0.0f;		
+		prtcl->vel.y = -prtcl->vel.y*0.3f;
+		if(prtcl->pos.y+prtcl->vel.y<=2.0f)prtcl->vel.x = -prtcl->vel.x;
+		if(prtcl->vel.y>=0.0f&&prtcl->pos.y+prtcl->vel.y>988.0f) prtcl->vel.x = 0.0f;	
 	}
 	else
 	{
-		prtcl->pos.y += prtcl->vel.y+prtcl->gravity.y;
-		prtcl->vel.y += (prtcl->vel.y<0)?prtcl->gravity.y:-prtcl->gravity.y;
+		prtcl->pos.y += prtcl->vel.y;
+		prtcl->vel.y += prtcl->gravity.y;
 	}
 	if(prtcl->pos.z+prtcl->vel.z<-100.0f||prtcl->pos.z+prtcl->vel.z>999.0f)
 	{
@@ -227,7 +236,7 @@ void esMvParticle(Eparticle *prtcl)
 	}
 	else
 	{
-		prtcl->pos.z += prtcl->vel.z+prtcl->gravity.z;
+		prtcl->pos.z += prtcl->vel.z;
 		prtcl->vel.z += prtcl->gravity.z;
 	}
 	return;
