@@ -61,7 +61,7 @@ int main()
 {
 	srand(time(NULL));
 	int i,j,k;
-	int quit=0,screen_w=1200,screen_h=990,frames=120,frame_ms;
+	int quit=0,pause=0,screen_w=1200,screen_h=990,frames=120,frame_ms;
 	unsigned int lifetime = 5000,drawn_frames=0;
 	float rot_per_frame = 0.3f;
 	double alpha=10;	
@@ -76,7 +76,7 @@ int main()
 	{
 		esResetParticle(&particle[i],1);
 	}
-	printf("\n>> Press Spacebar do Start/Stop cube roation\n>> Click right mouse button to speed up cube rotation\n>> Press Escape to exit\n>> Press Return (OK) to reset Particles\n\nTrying to get %d fps stable...\n",frames);
+	printf("\n>> Press Spacebar do Start/Stop cube roation\n>> Click right mouse button to speed up cube rotation\n>> Press Return (OK) to reset Particles\n>> Press p to Pause everything\n>> Press Escape to exit\n\nTrying to get %d fps stable...\n",frames);
 	frame_ms=(int)1000/((frames>5&&frames<1000)?frames:29);
 	atexit(SDL_Quit);
 	if( SDL_SetVideoMode( screen_w, screen_h, 32, SDL_OPENGL | SDL_HWPALETTE | SDL_GL_DOUBLEBUFFER ) == NULL )
@@ -115,12 +115,21 @@ int main()
 								esResetParticle(&particle[i],1);
 							}
 					}
+					if(event.key.keysym.sym==SDLK_p)
+						pause = (pause)?0:1; 
 				break;
 				case SDL_MOUSEBUTTONDOWN:
 					if( event.button.button == SDL_BUTTON_RIGHT )
 						rot_per_frame += 0.05f;
 				break;        
 			}			
+		}
+		if(pause)
+		{
+			now = SDL_GetTicks();
+			SDL_Delay((nxt_time<=now)?0:nxt_time-now);
+			nxt_time += frame_ms;
+			continue;
 		}		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
 		esDemoBg(900,600,alpha);
@@ -129,6 +138,7 @@ int main()
 		{
 			esDrawParticle(particle[i],4);
 			esMvParticle(&particle[i]);
+			esControlParticle(&particle[i]);
 		}
 		
 		esDrawCube(cube, cube_colors);		
@@ -154,17 +164,19 @@ int main()
 // Particle Functions
 void esControlParticle(Eparticle *prtcl)
 {
-	
+	prtcl->life -= prtcl->fade;
+	if(prtcl->life<=0.0f)
+		esResetParticle(prtcl,1);
 	return;
 }
 // Reset Paricles to zero or a random value
 void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
 	prtcl->vel.x = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
-	prtcl->vel.y = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-2000+(rand()%2001))/1000.0f:0.0f;
 	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
 	prtcl->pos.x = 600.0f; // (rnd_flag)?(float)(rand()%1200):0.0f;
-	prtcl->pos.y = 80.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
+	prtcl->pos.y = 200.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
 	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->gravity.y = 0.0005f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
@@ -174,8 +186,8 @@ void esResetParticle(Eparticle *prtcl,int rnd_flag)
 	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->deg = //(rnd_flag)?(-50+(rand()%110))/10:0.0f;;
 	prtcl->type = 1;
-	prtcl->life = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
-	prtcl->fade = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
+	prtcl->life = 0.8f+(rnd_flag)?((rand()%101))/1000.0f:0.0f;
+	prtcl->fade = 0.001f;//+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
 	prtcl->color.r = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.g = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.b = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
