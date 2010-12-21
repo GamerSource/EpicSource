@@ -10,7 +10,7 @@
 #include <SDL/SDL_opengl.h>
 
 #define DEBUG 1
-#define PARTICLES 500
+#define PARTICLES 50
 #define FRAME_H 10
 
 typedef struct _pos
@@ -112,7 +112,7 @@ int main()
 					{
 							for(i=0; i < PARTICLES; i++)
 							{
-								esResetParticle(&particle[i],1);
+								esResetParticle(&particle[i],2);
 							}
 					}
 					if(event.key.keysym.sym==SDLK_p)
@@ -136,7 +136,7 @@ int main()
 		
 		for(i=0; i < PARTICLES; i++)
 		{
-			esDrawParticle(particle[i],4);
+			esDrawParticle(particle[i],2);
 			esMvParticle(&particle[i]);
 			esControlParticle(&particle[i]);
 		}
@@ -172,11 +172,11 @@ void esControlParticle(Eparticle *prtcl)
 // Reset Paricles to zero or a random value
 void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
-	prtcl->vel.x = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
-	prtcl->vel.y = (rnd_flag)?(-2000+(rand()%2001))/1000.0f:0.0f;
+	prtcl->vel.x = (rnd_flag)?(-400+(rand()%801))/1000.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-1500+(rand()%1501))/1000.0f:0.0f;
 	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
 	prtcl->pos.x = 600.0f; // (rnd_flag)?(float)(rand()%1200):0.0f;
-	prtcl->pos.y = 200.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
+	prtcl->pos.y = 300.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
 	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->gravity.y = 0.0005f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
@@ -186,11 +186,11 @@ void esResetParticle(Eparticle *prtcl,int rnd_flag)
 	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->deg = //(rnd_flag)?(-50+(rand()%110))/10:0.0f;;
 	prtcl->type = 1;
-	prtcl->life = 0.8f+(rnd_flag)?((rand()%101))/1000.0f:0.0f;
-	prtcl->fade = 0.001f;//+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
-	prtcl->color.r = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
-	prtcl->color.g = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
-	prtcl->color.b = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->life = 8.0f+(rnd_flag)?((rand()%101))/1000.0f:0.0f;
+	prtcl->fade = 0.0003f;//+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
+	prtcl->color.r = 1.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->color.g = 1.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->color.b = 0.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.a = 1.0f;
 	return;
 }
