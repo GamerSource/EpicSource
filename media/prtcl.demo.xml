@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<demos>
+	<demo>
+		<name>Fountain</name>
+		<position>
+			<x random="1"><random min="200" max="1000" div="1.0" /></x>
+			<y random="1"><random min="850" max="990" div="1.0" /></y>
+			<z>0.0</z>
+		</position>
+		<gravity>
+			<x>0.0</x>
+			<y>0.0005</y>
+			<z>0.0</z>
+		</gravity>
+		<velocity>
+			<x random="1"><random min="-50" max="50" div="1000.0" /></x>
+			<y random="1"><random min="-200" max="0" div="1000.0" /></y>
+			<z>0.0</z>
+		</velocity>
+		<rotation>
+			<x>0.0</x>
+			<y>0.0</y>
+			<z>0.0</z>
+		</rotation>
+		<deg>0.0</deg>
+		<color>
+			<r random="1"><random min="-100" max="100" div="100.0" /></r>
+			<g random="1"><random min="-100" max="100" div="100.0" /></g>
+			<b random="1"><random min="-100" max="100" div="100.0" /></b>
+			<a>1.0</a>
+		</color>
+		<life random="1"><random min="80" max="200" div="100.0" /></life>
+		<fade>0.0005</fade>
+		<type a="3">square</type>
+	</demo>
+	<demo>
+		<name>Firework</name>
+		<position>
+			<x random="1"><random min="200" max="1000" div="1.0" /></x>
+			<y random="1"><random min="100" max="300" div="1.0" /></y>
+			<z>0.0</z>
+		</position>
+		<gravity>
+			<x>0.0</x>
+			<y>0.0005</y>
+			<z>0.0</z>
+		</gravity>
+		<velocity>
+			<x random="1"><random min="-1000" max="1000" div="1000.0" /></x>
+			<y random="1"><random min="-1000" max="1000" div="1000.0" /></y>
+			<z>0.0</z>
+		</velocity>
+		<rotation>
+			<x>0.0</x>
+			<y>0.0</y>
+			<z>0.0</z>
+		</rotation>
+		<deg>0.0</deg>
+		<color>
+			<r random="1"><random min="-100" max="100" div="100.0" /></r>
+			<g random="1"><random min="-100" max="100" div="100.0" /></g>
+			<b random="1"><random min="-100" max="100" div="100.0" /></b>
+			<a>1.0</a>
+		</color>
+		<life random="1"><random min="100" max="600" div="100.0" /></life>
+		<fade>0.001</fade>
+		<type a="3">square</type>
+	</demo>
+</demos>

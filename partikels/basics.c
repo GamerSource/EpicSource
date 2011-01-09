@@ -4,56 +4,9 @@
 * from Ep!c Source Game Engine
 *
 */
-#include <stdlib.h>
-#include <math.h>
-#include <SDL/SDL.h>
-#include <SDL/SDL_opengl.h>
 
-#define DEBUG 1
-#define PARTICLES 50
-#define FRAME_H 10
+#include "../basics.h"
 
-typedef struct _pos
-{
-	GLfloat x,y,z;
-} Epos;
-
-typedef struct _pos3
-{
-	Epos pos;
-	Epos size;
-	Epos rot;
-	float deg;
-} Epos3;
-typedef	 struct _Ergba
-{
-	float r,g,b,a;
-} Ergba;
-
-typedef	 struct _Ergb
-{
-	float r,g,b;
-} Ergb;
-
-// Type definition for Partikles
-typedef struct _prtkl 
-{
-	Epos vel,pos,gravity;
-	Epos rot;
-	float deg;
-	Ergba color;
-	int type;
-	float life,fade;
-} Eparticle;
-// Prototypes
-void esResetParticle(Eparticle *prtcl,int rnd_flag);
-void esDrawParticle(Eparticle prtcl,float a);
-void esMvParticle(Eparticle *prtcl);
-void esControlParticle(Eparticle *prtcl);
-void esDemoBg(float w, float h, double alpha);
-void esDrawCube(Epos3 data, Ergb color[]);
-void esDrawSquare(Epos3 data, Ergba color);
-int esInitGL();
 
 int rot_h = 0;
 
@@ -61,14 +14,14 @@ int main()
 {
 	srand(time(NULL));
 	int i,j,k;
-	int quit=0,pause=0,screen_w=1200,screen_h=990,frames=120,frame_ms;
+	int quit=0,pause=0,screen_w=1200,screen_h=990,frames=125,frame_ms;
 	unsigned int lifetime = 5000,drawn_frames=0;
 	float rot_per_frame = 0.3f;
 	double alpha=10;	
 	Uint32 now,nxt_time,frame_avg_helper;
 	SDL_Event event;
 	Ergb cube_colors[6] = {{0.0f,0.0f,0.0f},{1.0f,1.0f,1.0f},{1.0f,0.0f,0.0f},{0.0f,1.0f,1.0f},{0.0f,0.0f,1.0f},{1.0f,0.0f,1.0f}};
-	Epos3  cube ={600.0f,495.0f,100.0f, 250.0f,250.0f,250.0f, 1.0f,0.0f,1.0f, 0.0f};
+	Epos3  cube ={600.0f,495.0f,-80.0f, 250.0f,250.0f,250.0f, 1.0f,0.0f,1.0f, 0.0f};
 	Eparticle particle[PARTICLES];
 
 	
@@ -76,7 +29,8 @@ int main()
 	{
 		esResetParticle(&particle[i],1);
 	}
-	printf("\n>> Press Spacebar do Start/Stop cube roation\n>> Click right mouse button to speed up cube rotation\n>> Press Return (OK) to reset Particles\n>> Press p to Pause everything\n>> Press Escape to exit\n\nTrying to get %d fps stable...\n",frames);
+	printf("# © 2010 GamerSource\n# http://gamer-source.org/ep!c\n");
+	printf("\n>> Press spacebar do start/stop cube roation\n>> Click right mouse button to speed up cube rotation\n>> Click left mouse button to speed down cube rotation\n>> Press return (OK) to reset particles\n>> Press p to pause everything\n>> Press escape to exit\n\nTrying to get %d fps stable...\n",frames);
 	frame_ms=(int)1000/((frames>5&&frames<1000)?frames:29);
 	atexit(SDL_Quit);
 	if( SDL_SetVideoMode( screen_w, screen_h, 32, SDL_OPENGL | SDL_HWPALETTE | SDL_GL_DOUBLEBUFFER ) == NULL )
@@ -112,15 +66,19 @@ int main()
 					{
 							for(i=0; i < PARTICLES; i++)
 							{
-								esResetParticle(&particle[i],2);
+								esResetParticle(&particle[i],PARTICLESIZE);
 							}
 					}
 					if(event.key.keysym.sym==SDLK_p)
-						pause = (pause)?0:1; 
+						pause = (pause)?0:1;
+					if(event.key.keysym.sym==SDLK_d)
+						esDebugParticle(*particle);
 				break;
 				case SDL_MOUSEBUTTONDOWN:
 					if( event.button.button == SDL_BUTTON_RIGHT )
 						rot_per_frame += 0.05f;
+					if( event.button.button == SDL_BUTTON_LEFT )
+						rot_per_frame -= 0.05f;
 				break;        
 			}			
 		}
@@ -173,24 +131,24 @@ void esControlParticle(Eparticle *prtcl)
 void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
 	prtcl->vel.x = (rnd_flag)?(-400+(rand()%801))/1000.0f:0.0f;
-	prtcl->vel.y = (rnd_flag)?(-1500+(rand()%1501))/1000.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-1500+(rand()%1501))/1500.0f:0.0f;
 	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
-	prtcl->pos.x = 600.0f; // (rnd_flag)?(float)(rand()%1200):0.0f;
-	prtcl->pos.y = 300.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
+	prtcl->pos.x = (rnd_flag)?(float)(550+rand()%101):0.0f;
+	prtcl->pos.y = 350.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
 	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
-	prtcl->gravity.y = 0.0005f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
+	prtcl->gravity.y = 0.0009f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->gravity.z = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->rot.x = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.y = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->deg = //(rnd_flag)?(-50+(rand()%110))/10:0.0f;;
 	prtcl->type = 1;
-	prtcl->life = 8.0f+(rnd_flag)?((rand()%101))/1000.0f:0.0f;
+	prtcl->life = (rnd_flag)?(0.1f+(rand()%101))/1000.0f:0.0f;
 	prtcl->fade = 0.0003f;//+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
-	prtcl->color.r = 1.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
-	prtcl->color.g = 1.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
-	prtcl->color.b = 0.0f;//(rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->color.r = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->color.g = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
+	prtcl->color.b = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.a = 1.0f;
 	return;
 }
@@ -251,6 +209,19 @@ void esMvParticle(Eparticle *prtcl)
 		prtcl->pos.z += prtcl->vel.z;
 		prtcl->vel.z += prtcl->gravity.z;
 	}
+	return;
+}
+
+void esDebugParticle(Eparticle prtcl)
+{
+	printf("\n############*- DEBUG PENGUIN -*############\n");
+	printf("> Position:\n\tx: %f\n\ty: %f\n\tz: %f\n",prtcl.pos.x,prtcl.pos.y,prtcl.pos.z);
+	printf("> Velocity:\n\tx: %f\n\ty: %f\n\tz: %f\n",prtcl.vel.x,prtcl.vel.y,prtcl.vel.z);
+	printf("> Gravity:\n\tx: %f\n\ty: %f\n\tz: %f\n",prtcl.gravity.x,prtcl.gravity.y,prtcl.gravity.z);
+	printf("> Rotation:\n\tx: %f\n\ty: %f\n\tz: %f\n\tDegree: %f\n",prtcl.rot.x,prtcl.rot.y,prtcl.rot.z,prtcl.deg);
+	printf("-------\n> Color:\n\tr: %f\n\tg: %f\n\tb: %f\n\ta: %f\n",prtcl.color.r,prtcl.color.g,prtcl.color.b,prtcl.color.a);
+	printf("-------\n> Type: %d\nLife:\n\t-time: %f\n\t-fade: %f",prtcl.type,prtcl.life,prtcl.fade);
+	printf("\n############+- DEBUG PENGUIN -+############\n");
 	return;
 }
 
