@@ -1,6 +1,6 @@
 typedef struct _pos
 {
-	GLfloat x,y,z;
+	float x,y,z;
 } Epos;
 
 typedef struct _pos3
