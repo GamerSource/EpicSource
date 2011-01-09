@@ -66,7 +66,7 @@ int main()
 					{
 							for(i=0; i < PARTICLES; i++)
 							{
-								esResetParticle(&particle[i],PARTICLESIZE);
+								esResetParticle(&particle[i],1);
 							}
 					}
 					if(event.key.keysym.sym==SDLK_p)
@@ -94,7 +94,7 @@ int main()
 		
 		for(i=0; i < PARTICLES; i++)
 		{
-			esDrawParticle(particle[i],2);
+			esDrawParticle(particle[i],PARTICLESIZE);
 			esMvParticle(&particle[i]);
 			esControlParticle(&particle[i]);
 		}
@@ -133,7 +133,7 @@ void esResetParticle(Eparticle *prtcl,int rnd_flag)
 	prtcl->vel.x = (rnd_flag)?(-400+(rand()%801))/1000.0f:0.0f;
 	prtcl->vel.y = (rnd_flag)?(-1500+(rand()%1501))/1500.0f:0.0f;
 	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
-	prtcl->pos.x = (rnd_flag)?(float)(550+rand()%101):0.0f;
+	prtcl->pos.x = (rnd_flag)?(float)(595+rand()%11):0.0f;
 	prtcl->pos.y = 350.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
 	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
