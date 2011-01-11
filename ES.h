@@ -12,4 +12,8 @@
 #include "ES_bodies.h"
 #define HAVE_BODIES 1
 #endif
+#ifndef HAVE_PARTICLE
+#include "ES_particle.h"
+#define HAVE_PARTICLE 1
+#endif
 int esInitGL(int screen_w,int screen_h);

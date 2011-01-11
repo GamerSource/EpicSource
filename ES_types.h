@@ -25,7 +25,8 @@ typedef struct _prtkl
 {
 	Epos vel,pos,gravity;
 	Epos rot;
-	float deg;
+	int rot_rounds; // 0 = endless, -1 = no
+	float deg,deg_now;
 	Ergba color;
 	int type;
 	float life,fade;

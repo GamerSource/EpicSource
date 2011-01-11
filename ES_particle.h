@@ -1,9 +1,10 @@
+#define HAVE_PARTICLE 1
 #include "ES.h"
 
 #define DEBUG 1
-#define PARTICLES 10000
+#define PARTICLES 100
 #define FRAME_H 10
-#define PARTICLESIZE 5
+#define PARTICLESIZE 15
 
 
 

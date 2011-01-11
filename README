@@ -3,4 +3,8 @@ GamerSource won't take responsibility for any  damage made  by this project.
 
 Use it only if you're sure what you do and you've checked the few poor lines of code...
 
-© 2010 http://gamer-source.org
+To link the Objectfiles into a binary use:
+
+gcc obj1.o obj2.o and_so_on.o -o output.bin -lGL  `sdl-config --cflags --libs` 
+
+© 2010-2011 http://gamer-source.org
