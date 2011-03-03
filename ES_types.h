@@ -28,6 +28,6 @@ typedef struct _prtkl
 	int rot_rounds; // 0 = endless, -1 = no
 	float deg,deg_now;
 	Ergba color;
-	int type;
+	int type,lifes;
 	float life,fade;
 } Eparticle;

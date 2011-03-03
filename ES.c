@@ -1,6 +1,6 @@
 #include "ES.h"
 
-int esInitGL(int screen_w,int screen_h)
+int esInitGL(int screen_w,int screen_h/*, int depth*/)
 {
 	glClearColor(0.8, 0.8, 0.8, 0 );
     glClearDepth( 1.0f );
