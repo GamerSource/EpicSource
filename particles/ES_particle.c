@@ -3,6 +3,7 @@
 void esControlParticle(Eparticle *prtcl)
 {
 	prtcl->life -= prtcl->fade;
+	prtcl->deg += (prtcl->deg<360.0f)?3.0f+(rand()%121)/100.0f:-357.0f+(rand()%121)/100.0f;
 	if(prtcl->life<=0.0f)
 		esResetParticle(prtcl,1);
 	return;
@@ -10,11 +11,11 @@ void esControlParticle(Eparticle *prtcl)
 // Reset Paricles to zero or a random value
 void esResetParticle(Eparticle *prtcl,int rnd_flag)
 {
-	prtcl->vel.x = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
-	prtcl->vel.y = (rnd_flag)?(-1000+(rand()%2001))/1000.0f:0.0f;
-	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/1000.0f:0.0f;
-	prtcl->pos.x = 300.0f;//(rnd_flag)?(float)(595+rand()%11):0.0f;
-	prtcl->pos.y = 250.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
+	prtcl->vel.x = (rnd_flag)?(-10000+(rand()%20001))/1000.0f:0.0f;
+	prtcl->vel.y = (rnd_flag)?(-10000+(rand()%20001))/1000.0f:0.0f;
+	prtcl->vel.z = (rnd_flag)?(-30+(rand()%61))/2000.0f:0.0f;
+	prtcl->pos.x = 600.0f;//(rnd_flag)?(float)(595+rand()%11):0.0f;
+	prtcl->pos.y = 150.0f; // (rnd_flag)?(float)(rand()%990):0.0f;
 	prtcl->pos.z = (rnd_flag)?(float)(rand()%50):0.0f;
 	prtcl->gravity.x = 0.0f; //(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
 	prtcl->gravity.y = 0.004f ;//(rnd_flag)?(-50+(rand()%101))/10000.0f:0.0f;
@@ -22,10 +23,10 @@ void esResetParticle(Eparticle *prtcl,int rnd_flag)
 	prtcl->rot.x = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.y = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
 	prtcl->rot.z = (rnd_flag)?(-50+(rand()%101))/100.0f:0.0f;
-	prtcl->deg = 0.0f;//(rnd_flag)?(-500+(rand()%101))/10:0.0f;;
-	prtcl->type = 1;
-	prtcl->life = (rnd_flag)?(0.1f+(rand()%101))/1000.0f:0.0f;
-	prtcl->fade = 0.0000f;//+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
+	prtcl->deg = 45.0f;//(rnd_flag)?(-500+(rand()%101))/10:0.0f;;
+	prtcl->type = 2;
+	prtcl->life = (rnd_flag)?(0.01f+(rand()%101)/10000.0f):0.0f;
+	prtcl->fade = 0.05f+(rnd_flag)?((rand()%11))/1000.0f:0.0f;
 	prtcl->color.r = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.g = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
 	prtcl->color.b = (rnd_flag)?(-100+(rand()%200))/100.0f:0.0f;
@@ -51,7 +52,7 @@ void esDrawParticle(Eparticle prtcl,float a)
 		}
 		case 2: // Draw a Cube for each Particle
 		{
-			esDrawCube((Epos3){prtcl.pos.x,prtcl.pos.y,prtcl.pos.z, a,a,a, prtcl.rot.x,prtcl.rot.y,prtcl.rot.z, prtcl.deg,},(Ergb[6]){(Ergb){0.5f,0.5f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.7f,0.7f,0.7f},(Ergb){0.5f,0.5f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.7f,0.7f,0.7f}});
+			esDrawCube((Epos3){prtcl.pos.x,prtcl.pos.y,prtcl.pos.z, a,a,a, prtcl.rot.x,prtcl.rot.y,prtcl.rot.z, prtcl.deg,},(Ergb[6]){(Ergb){0.0f,0.0f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.7f,0.7f,0.7f},(Ergb){0.5f,0.5f,0.5f},(Ergb){0.6f,0.6f,0.6f},(Ergb){0.0f,0.7f,0.0f}});
 			break;
 		}
 	}
@@ -70,8 +71,9 @@ void esMvParticle(Eparticle *prtcl)
 		prtcl->vel.x += prtcl->gravity.x;
 	}
 	if(prtcl->pos.y+prtcl->vel.y<=2.0f||prtcl->pos.y+prtcl->vel.y>988.0f)
-	{
-		prtcl->vel.y = -prtcl->vel.y*0.3f;
+	{		
+		prtcl->vel.y *= -0.4f;
+		prtcl->vel.x *= 0.3f;	
 		if(prtcl->pos.y+prtcl->vel.y<=2.0f)prtcl->vel.x = -prtcl->vel.x;
 		if(prtcl->vel.y>=0.0f&&prtcl->pos.y+prtcl->vel.y>988.0f) prtcl->vel.x = 0.0f;	
 	}
@@ -80,6 +82,7 @@ void esMvParticle(Eparticle *prtcl)
 		prtcl->pos.y += prtcl->vel.y;
 		prtcl->vel.y += prtcl->gravity.y;
 	}
+	if(prtcl->vel.x==0.0f&&prtcl->pos.y+prtcl->vel.y>987.0f) prtcl->vel.y =0.0f;
 	if(prtcl->pos.z+prtcl->vel.z<-100.0f||prtcl->pos.z+prtcl->vel.z>999.0f)
 	{
 		prtcl->vel.z = 0.0f;		

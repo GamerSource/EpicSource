@@ -2,7 +2,7 @@
 #include "ES.h"
 
 #define DEBUG 1
-#define PARTICLES 100
+#define PARTICLES 1000
 #define FRAME_H 10
 #define PARTICLESIZE 15
 

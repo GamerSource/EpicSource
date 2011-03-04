@@ -11,7 +11,6 @@
 
 #include "../ES.h"
 
-
 int rot_h = 0;
 
 int main()
@@ -94,13 +93,13 @@ int main()
 			continue;
 		}		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);		
-		esDemoBg(900,600,alpha);
-		
+		//esDemoBg(900,600,alpha);
+		esDemoBg(800,500,alpha);
 		for(i=0; i < PARTICLES; i++)
 		{
 			esDrawParticle(particle[i],PARTICLESIZE);
-			esMvParticle(&particle[i]);
 			esControlParticle(&particle[i]);
+			esMvParticle(&particle[i]);			
 		}
 		
 		esDrawCube(cube, cube_colors);		
